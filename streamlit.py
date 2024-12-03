@@ -46,6 +46,7 @@ elif search_type == "NDC":
 insurance_input = st.selectbox("Search for an Insurance:", options=[""] + list(insurance_names), format_func=lambda x: x if x else "Type to search...")
 
 # Filter data based on the selected criteria
+unique_ndcs = pd.DataFrame()  # Ensure unique_ndcs is always defined
 if search_value and insurance_input:
     if search_type == "Drug Name":
         filtered_df = df[(df['Cleaned Up Drug Name'].str.contains(search_value, na=False, case=False)) & 
@@ -53,6 +54,8 @@ if search_value and insurance_input:
     elif search_type == "Rxcui":
         filtered_df = df[(df['Rxcui'] == int(search_value)) & 
                          (df['Insurance'].str.contains(insurance_input, na=False, case=False))]
+        if not filtered_df.empty:
+            unique_ndcs = filtered_df[['NDC', 'Cleaned Up Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb']].drop_duplicates()
     elif search_type == "NDC":
         filtered_df = df[(df['NDC'] == search_value) & 
                          (df['Insurance'].str.contains(insurance_input, na=False, case=False))]
@@ -96,12 +99,12 @@ if not filtered_df.empty:
     elif filter_option == "Lowest Copay":
         alternatives = alternatives.sort_values(by="Copay", ascending=True, na_position="first")
 
-    # Display unique NDCs
-    if not unique_ndcs.empty:
+    # Display unique NDCs if search type is Rxcui
+    if search_type == "Rxcui" and not unique_ndcs.empty:
         st.subheader(f"Unique NDCs for Rxcui {search_value}:")
         unique_ndc_list = unique_ndcs['NDC'].unique()
         
-        # عرض قائمة الـ NDCs بشكل مرتب
+        # Display the NDCs
         for ndc in unique_ndc_list:
             st.markdown(f"- **{ndc}**")
 
