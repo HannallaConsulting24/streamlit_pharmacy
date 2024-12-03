@@ -76,16 +76,7 @@ if search_type == "Rxcui" and not filtered_df.empty:
     
     # Display unique NDCs
     if not unique_ndcs.empty:
-        st.subheader(f"Unique NDCs for Rxcui {search_value}:")
-        for _, ndc_row in unique_ndcs.iterrows():
-            st.markdown("---")
-            st.markdown(f"### NDC: **{ndc_row['NDC']}**")
-            st.markdown(f"- **Drug Name**: {ndc_row['Cleaned Up Drug Name']}")
-            st.markdown(f"- **Quantity**: {ndc_row['Quantity']}")
-            st.markdown(f"- **Net**: {ndc_row['Net']}")
-            st.markdown(f"- **Copay**: {ndc_row['Copay']}")
-            st.markdown(f"- **Covered**: {ndc_row['Covered']}")
-            st.markdown(f"- **ClassDb**: {ndc_row['ClassDb']}")
+        st.subheader(f"Unique NDCs for Rxcui {search_value}:**{ndc_row['NDC']}**")
 else:
     if search_value and insurance_input:
         st.warning(f"No results found for {search_type}: {search_value} with Insurance: {insurance_input}.")
