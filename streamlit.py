@@ -53,14 +53,12 @@ if search_value and insurance_input:
     elif search_type == "Rxcui":
         filtered_df = df[(df['Rxcui'] == int(search_value)) & 
                          (df['Insurance'].str.contains(insurance_input, na=False, case=False))]
-        # Get related NDCs for the selected RxCUI
-        related_ndcs = df[df['Rxcui'] == int(search_value)]['NDC'].dropna().unique()
     elif search_type == "NDC":
         filtered_df = df[(df['NDC'] == search_value) & 
                          (df['Insurance'].str.contains(insurance_input, na=False, case=False))]
     
     if not filtered_df.empty:
-        filtered_df = filtered_df[['Cleaned Up Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb', 'Rxcui', 'RxNorm Name', 'NDC']].drop_duplicates().replace("Not Available", np.nan)
+        filtered_df = filtered_df[['Cleaned Up Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb', 'Rxcui', 'RxNorm Name']].drop_duplicates().replace("Not Available", np.nan)
     else:
         filtered_df = pd.DataFrame()
 else:
@@ -79,13 +77,7 @@ if not filtered_df.empty:
         st.markdown(f"- **ClassDb**: {row['ClassDb']}")
         st.markdown(f"- **RxCUI**: {row['Rxcui']}")
         st.markdown(f"- **RxNorm Name**: {row['RxNorm Name']}")
-        st.markdown(f"- **NDC**: {row['NDC']}")
         st.markdown("---")
-    
-    # Display related NDCs if searching by RxCUI
-    if search_type == "Rxcui" and related_ndcs.size > 0:
-        st.subheader(f"Related NDCs for RxCUI: {search_value}")
-        st.write(", ".join(related_ndcs))
     
     # Display alternative drugs from the same class and same insurance
     st.subheader("Alternative Drugs in the Same Class and Insurance")
