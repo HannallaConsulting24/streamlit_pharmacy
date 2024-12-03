@@ -32,18 +32,18 @@ st.markdown("### Search Options")
 st.info("Search using Drug Name, Rxcui, or NDC, and Insurance.")
 
 # Fetch unique values for dropdowns
-drug_names = df['Cleaned Up Drug Name'].dropna().unique()
+drug_names = df['Drug Name'].dropna().unique()
 insurance_names = df['Insurance'].dropna().unique()
-rxcui_codes = df['Rxcui'].dropna().unique()
+rxcui_codes = df['RxCUI'].dropna().unique()
 ndc_codes = ndc_df['NDC'].dropna().unique()
 
 # Search fields with auto-complete
-search_type = st.radio("Select Search Type:", ["Drug Name", "Rxcui", "NDC"])
+search_type = st.radio("Select Search Type:", ["Drug Name", "RxCUI", "NDC"])
 if search_type == "Drug Name":
     drug_name_input = st.selectbox("Search for a Drug Name:", options=[""] + list(drug_names), format_func=lambda x: x if x else "Type to search...")
     search_value = drug_name_input
-elif search_type == "Rxcui":
-    rxcui_input = st.selectbox("Search for an Rxcui:", options=[""] + list(rxcui_codes), format_func=lambda x: str(x) if x else "Type to search...")
+elif search_type == "RxCUI":
+    rxcui_input = st.selectbox("Search for an RxCUI:", options=[""] + list(rxcui_codes), format_func=lambda x: str(x) if x else "Type to search...")
     search_value = rxcui_input
 elif search_type == "NDC":
     ndc_input = st.selectbox("Search for an NDC:", options=[""] + list(ndc_codes), format_func=lambda x: str(x) if x else "Type to search...")
@@ -54,15 +54,15 @@ insurance_input = st.selectbox("Search for an Insurance:", options=[""] + list(i
 # Filter data based on the selected criteria
 if search_value and insurance_input:
     if search_type == "Drug Name":
-        filtered_df = df[(df['Cleaned Up Drug Name'].str.contains(search_value, na=False, case=False)) & 
+        filtered_df = df[(df['Drug Name'].str.contains(search_value, na=False, case=False)) & 
                          (df['Insurance'].str.contains(insurance_input, na=False, case=False))]
-    elif search_type == "Rxcui":
-        filtered_df = df[(df['Rxcui'] == int(search_value)) & 
+    elif search_type == "RxCUI":
+        filtered_df = df[(df['RxCUI'] == int(search_value)) & 
                          (df['Insurance'].str.contains(insurance_input, na=False, case=False))]
         if not filtered_df.empty:
-            # Extract unique NDCs associated with the selected Rxcui
+            # Extract unique NDCs associated with the selected RxCUI
             ndc_list = filtered_df['NDC'].dropna().unique()
-            st.markdown(f"### Found {len(ndc_list)} NDC(s) associated with Rxcui {search_value}:")
+            st.markdown(f"### Found {len(ndc_list)} NDC(s) associated with RxCUI {search_value}:")
             for ndc in ndc_list:
                 st.markdown(f"- **NDC**: {ndc}")
     elif search_type == "NDC":
@@ -75,7 +75,7 @@ if search_value and insurance_input:
                                        'MARKETING_EFFECTIVE_TIME_LOW', 'MARKETING_STATUS', 
                                        'SCORE', 'SHAPETEXT', 'SHAPE', 'SIZE']].drop_duplicates()
         else:
-            filtered_df = filtered_df[['Drug Name', 'Qty', 'Total Net', 'Patient Copay', 'Insurance Covered', 'Drug Class']].drop_duplicates().replace("Not Available", np.nan)
+            filtered_df = filtered_df[['Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb']].drop_duplicates().replace("Not Available", np.nan)
     else:
         filtered_df = pd.DataFrame()
 else:
@@ -87,7 +87,7 @@ if not filtered_df.empty:
         st.subheader(f"Results for your NDC search:")
         for _, row in filtered_df.iterrows():
             st.markdown("---")
-            st.markdown(f"- **NDC**: {row['NDC']}")  
+            st.markdown(f"- **NDC**: {row['NDC']}")
             st.markdown(f"- **ANDA**: {row['ANDA']}")
             st.markdown(f"- **Color Text**: {row['COLORTEXT']}")
             st.markdown(f"- **DM SPL ID**: {row['DM_SPL_ID']}")
@@ -106,7 +106,7 @@ if not filtered_df.empty:
         st.subheader(f"Results for your search:")
         for _, row in filtered_df.iterrows():
             st.markdown("---")
-            st.markdown(f"### Drug Name: **{row['Cleaned Up Drug Name']}**")
+            st.markdown(f"### Drug Name: **{row['Drug Name']}**")
             st.markdown(f"- **Quantity**: {row['Quantity']}")
             st.markdown(f"- **Net**: {row['Net']}")
             st.markdown(f"- **Copay**: {row['Copay']}")
@@ -114,11 +114,11 @@ if not filtered_df.empty:
             st.markdown(f"- **ClassDb**: {row['ClassDb']}")
             st.markdown("---")
         
-        # Display alternative drugs from the same class and same insurance for Drug Name and Rxcui only
-        if search_type in ["Drug Name", "Rxcui"]:
+        # Display alternative drugs from the same class and same insurance for Drug Name and RxCUI only
+        if search_type in ["Drug Name", "RxCUI"]:
             st.subheader("Alternative Drugs in the Same Class and Insurance")
             class_name = filtered_df.iloc[0]['ClassDb']  # Get the class of the first drug
-            alternatives = df[(df['ClassDb'] == class_name) & (df['Insurance'] == insurance_input)][['Cleaned Up Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb']].drop_duplicates()
+            alternatives = df[(df['ClassDb'] == class_name) & (df['Insurance'] == insurance_input)][['Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb']].drop_duplicates()
 
             # Handle missing values and sorting
             alternatives['Net'] = pd.to_numeric(alternatives['Net'], errors='coerce')  # Keep nan for lowest
@@ -137,7 +137,7 @@ if not filtered_df.empty:
             # Display filtered alternatives
             for _, alt_row in alternatives.iterrows():
                 st.markdown("---")
-                st.markdown(f"### Alternative Drug Name: **{alt_row['Cleaned Up Drug Name']}**")
+                st.markdown(f"### Alternative Drug Name: **{alt_row['Drug Name']}**")
                 st.markdown(f"- **Class Name**: {alt_row['ClassDb']}")
                 st.markdown(f"- **Details**: Quantity: {alt_row['Quantity']}, Net: {alt_row['Net']}, Copay: {alt_row['Copay']}, Covered: {alt_row['Covered']}")
 else:
