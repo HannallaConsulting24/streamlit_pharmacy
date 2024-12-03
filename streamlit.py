@@ -5,12 +5,12 @@ import numpy as np  # To use np.nan
 # Load the datasets
 @st.cache_data
 def load_main_data():
-    file_path = 'Matched_Data_Final3.csv'  # Original file
+    file_path = 'Matched_Data_Final3.csv'  # Updated file
     return pd.read_csv(file_path).drop_duplicates()
 
 @st.cache_data
 def load_ndc_data():
-    file_path = 'NDC_Details_RxNav.csv'  # Updated file for NDC search
+    file_path = 'NDC_Details_RxNav.csv'  # File for NDC search
     return pd.read_csv(file_path).drop_duplicates()
 
 # Load the data
@@ -87,7 +87,7 @@ if not filtered_df.empty:
         st.subheader(f"Results for your NDC search:")
         for _, row in filtered_df.iterrows():
             st.markdown("---")
-            st.markdown(f"- **NDC**: {row['NDC']}")
+            st.markdown(f"- **NDC**: {row['NDC']}")  
             st.markdown(f"- **ANDA**: {row['ANDA']}")
             st.markdown(f"- **Color Text**: {row['COLORTEXT']}")
             st.markdown(f"- **DM SPL ID**: {row['DM_SPL_ID']}")
