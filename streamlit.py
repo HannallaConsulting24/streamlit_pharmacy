@@ -52,13 +52,15 @@ if search_value and insurance_input:
                          (df['Insurance'].str.contains(insurance_input, na=False, case=False))]
         
         if not filtered_df.empty:
-            ndc_count = filtered_df['NDC'].nunique()  # Count unique NDCs
+            unique_ndcs = filtered_df[['NDC', 'Cleaned Up Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb']].drop_duplicates()
         else:
-            ndc_count = 0
+            unique_ndcs = pd.DataFrame()
     else:
         filtered_df = pd.DataFrame()
+        unique_ndcs = pd.DataFrame()
 else:
     filtered_df = pd.DataFrame()
+    unique_ndcs = pd.DataFrame()
 
 # Display results
 if search_type == "Rxcui" and not filtered_df.empty:
@@ -72,9 +74,18 @@ if search_type == "Rxcui" and not filtered_df.empty:
         st.markdown(f"- **Covered**: {row['Covered']}")
         st.markdown(f"- **ClassDb**: {row['ClassDb']}")
     
-    # Display unique NDC count
-    st.markdown(f"---")
-    st.success(f"**Unique NDC Count for Rxcui {search_value}: {ndc_count}**")
+    # Display unique NDCs
+    if not unique_ndcs.empty:
+        st.subheader(f"Unique NDCs for Rxcui {search_value}:")
+        for _, ndc_row in unique_ndcs.iterrows():
+            st.markdown("---")
+            st.markdown(f"### NDC: **{ndc_row['NDC']}**")
+            st.markdown(f"- **Drug Name**: {ndc_row['Cleaned Up Drug Name']}")
+            st.markdown(f"- **Quantity**: {ndc_row['Quantity']}")
+            st.markdown(f"- **Net**: {ndc_row['Net']}")
+            st.markdown(f"- **Copay**: {ndc_row['Copay']}")
+            st.markdown(f"- **Covered**: {ndc_row['Covered']}")
+            st.markdown(f"- **ClassDb**: {ndc_row['ClassDb']}")
 else:
     if search_value and insurance_input:
         st.warning(f"No results found for {search_type}: {search_value} with Insurance: {insurance_input}.")
