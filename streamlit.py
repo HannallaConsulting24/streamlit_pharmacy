@@ -75,7 +75,7 @@ if search_value and insurance_input:
                                        'MARKETING_EFFECTIVE_TIME_LOW', 'MARKETING_STATUS', 
                                        'SCORE', 'SHAPETEXT', 'SHAPE', 'SIZE']].drop_duplicates()
         else:
-            filtered_df = filtered_df[['Cleaned Up Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb']].drop_duplicates().replace("Not Available", np.nan)
+            filtered_df = filtered_df[['Drug Name', 'Qty', 'Total Net', 'Patient Copay', 'Insurance Covered', 'Drug Class']].drop_duplicates().replace("Not Available", np.nan)
     else:
         filtered_df = pd.DataFrame()
 else:
