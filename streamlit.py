@@ -5,7 +5,7 @@ import numpy as np  # To use np.nan
 # Load the dataset
 @st.cache_data
 def load_data():
-    file_path = 'Matched_Data_Final2.csv'  # Updated file name 
+    file_path = 'Matched_Data_Final2.csv'  # Updated file name
     return pd.read_csv(file_path).drop_duplicates()
 
 # Load the data
@@ -58,7 +58,7 @@ if search_value and insurance_input:
                          (df['Insurance'].str.contains(insurance_input, na=False, case=False))]
     
     if not filtered_df.empty:
-        filtered_df = filtered_df[['Cleaned Up Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb']].drop_duplicates().replace("Not Available", np.nan)
+        filtered_df = filtered_df[['Cleaned Up Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb', 'Rxcui', 'RxNorm Name']].drop_duplicates().replace("Not Available", np.nan)
     else:
         filtered_df = pd.DataFrame()
 else:
@@ -75,6 +75,8 @@ if not filtered_df.empty:
         st.markdown(f"- **Copay**: {row['Copay']}")
         st.markdown(f"- **Covered**: {row['Covered']}")
         st.markdown(f"- **ClassDb**: {row['ClassDb']}")
+        st.markdown(f"- **RxCUI**: {row['Rxcui']}")
+        st.markdown(f"- **RxNorm Name**: {row['RxNorm Name']}")
         st.markdown("---")
     
     # Display alternative drugs from the same class and same insurance
