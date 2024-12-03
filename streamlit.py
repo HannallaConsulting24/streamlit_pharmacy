@@ -12,54 +12,44 @@ df = load_data()
 
 # Display logo and title
 logo_path = "image (1).png"  # Path to the uploaded logo
-
-# Use columns for better alignment
-col1, col2 = st.columns([1, 4])  # Adjust column widths
+col1, col2 = st.columns([1, 4])
 with col1:
     st.image(logo_path, use_column_width=True)
 with col2:
     st.title("CDI Medication Guiding Tool 💊")
 
-# Search criteria
+# Search options
 st.markdown("### Search Options")
 st.info("Search using Drug Name, Rxcui, or NDC, and Insurance.")
 
-# Fetch unique values for dropdowns
+# Unique dropdown values
 drug_names = df['Cleaned Up Drug Name'].dropna().unique()
 insurance_names = df['Insurance'].dropna().unique()
 rxcui_codes = df['Rxcui'].dropna().unique()
 ndc_codes = df['NDC'].dropna().unique()
 
-# Search fields with auto-complete
+# Search filters
 search_type = st.radio("Select Search Type:", ["Drug Name", "Rxcui", "NDC"])
 if search_type == "Drug Name":
-    drug_name_input = st.selectbox("Search for a Drug Name:", options=[""] + list(drug_names), format_func=lambda x: x if x else "Type to search...")
-    search_value = drug_name_input
+    search_value = st.selectbox("Search for a Drug Name:", [""] + list(drug_names))
 elif search_type == "Rxcui":
-    rxcui_input = st.selectbox("Search for an Rxcui:", options=[""] + list(rxcui_codes), format_func=lambda x: str(x) if x else "Type to search...")
-    search_value = rxcui_input
+    search_value = st.selectbox("Search for an Rxcui:", [""] + [str(x) for x in rxcui_codes])
 elif search_type == "NDC":
-    ndc_input = st.selectbox("Search for an NDC:", options=[""] + list(ndc_codes), format_func=lambda x: str(x) if x else "Type to search...")
-    search_value = ndc_input
+    search_value = st.selectbox("Search for an NDC:", [""] + [str(x) for x in ndc_codes])
 
-insurance_input = st.selectbox("Search for an Insurance:", options=[""] + list(insurance_names), format_func=lambda x: x if x else "Type to search...")
+insurance_input = st.selectbox("Select Insurance:", [""] + list(insurance_names))
 
-# Filter data based on the selected criteria
+# Filter the data
 if search_value and insurance_input:
     if search_type == "Drug Name":
-        filtered_df = df[(df['Cleaned Up Drug Name'].str.contains(search_value, na=False, case=False)) & 
-                         (df['Insurance'].str.contains(insurance_input, na=False, case=False))]
+        filtered_df = df[(df['Cleaned Up Drug Name'].str.contains(search_value, case=False)) & 
+                         (df['Insurance'] == insurance_input)]
     elif search_type == "Rxcui":
-        filtered_df = df[(df['Rxcui'] == int(search_value)) & 
-                         (df['Insurance'].str.contains(insurance_input, na=False, case=False))]
+        filtered_df = df[(df['Rxcui'] == int(search_value)) & (df['Insurance'] == insurance_input)]
     elif search_type == "NDC":
-        filtered_df = df[(df['NDC'] == search_value) & 
-                         (df['Insurance'].str.contains(insurance_input, na=False, case=False))]
+        filtered_df = df[(df['NDC'] == search_value) & (df['Insurance'] == insurance_input)]
     
-    if not filtered_df.empty:
-        filtered_df = filtered_df[['Cleaned Up Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb']].drop_duplicates().fillna("Not Available")
-    else:
-        filtered_df = pd.DataFrame()
+    filtered_df = filtered_df[['Cleaned Up Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb']].drop_duplicates().fillna("Not Available")
 else:
     filtered_df = pd.DataFrame()
 
@@ -74,33 +64,30 @@ if not filtered_df.empty:
         st.markdown(f"- **Copay**: {row['Copay']}")
         st.markdown(f"- **Covered**: {row['Covered']}")
         st.markdown(f"- **ClassDb**: {row['ClassDb']}")
-        st.markdown("---")
-    
-    # Display alternative drugs from the same class and same insurance
+
+    # Display alternative drugs
     st.subheader("Alternative Drugs in the Same Class and Insurance")
-    class_name = filtered_df.iloc[0]['ClassDb']  # Get the class of the first drug
+    class_name = filtered_df.iloc[0]['ClassDb']
     alternatives = df[(df['ClassDb'] == class_name) & (df['Insurance'] == insurance_input)][['Cleaned Up Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb']].drop_duplicates()
 
-    # Handle "NC" or NaN values for sorting
+    # Replace missing values for display
     alternatives['Net'] = pd.to_numeric(alternatives['Net'], errors='coerce').fillna(-1e9)
     alternatives['Copay'] = pd.to_numeric(alternatives['Copay'], errors='coerce').fillna(1e9)
-
-    # Replace placeholders with "Not Available" for display
     alternatives['Net'] = alternatives['Net'].replace(-1e9, "Not Available")
     alternatives['Copay'] = alternatives['Copay'].replace(1e9, "Not Available")
     alternatives['Covered'] = alternatives['Covered'].fillna("Not Available")
 
     # Filtering options
     st.markdown(f"**Found {len(alternatives)} alternatives in the same class and insurance.**")
-    filter_option = st.selectbox("Filter Alternatives By:", options=["None", "Highest Net", "Lowest Copay"])
-    
+    filter_option = st.selectbox("Filter Alternatives By:", ["None", "Highest Net", "Lowest Copay"])
+
     # Apply filter
     if filter_option == "Highest Net":
         alternatives = alternatives.sort_values(by="Net", ascending=False)
     elif filter_option == "Lowest Copay":
         alternatives = alternatives.sort_values(by="Copay", ascending=True)
 
-    # Display filtered alternatives
+    # Display alternatives
     for _, alt_row in alternatives.iterrows():
         st.markdown("---")
         st.markdown(f"### Alternative Drug Name: **{alt_row['Cleaned Up Drug Name']}**")
