@@ -17,7 +17,7 @@ df = load_matched_data()
 ndc_df = load_ndc_data()
 
 # Display logo and title
-logo_path = "image.png"  # Path to the uploaded logo
+logo_path = "image (1).png"  # Path to the uploaded logo
 
 # Use columns for better alignment
 col1, col2 = st.columns([1, 4])  # Adjust column widths
