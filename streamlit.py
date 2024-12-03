@@ -53,6 +53,12 @@ if search_value and insurance_input:
     elif search_type == "Rxcui":
         filtered_df = df[(df['Rxcui'] == int(search_value)) & 
                          (df['Insurance'].str.contains(insurance_input, na=False, case=False))]
+        if not filtered_df.empty:
+            # Extract unique NDCs associated with the selected Rxcui
+            ndc_list = filtered_df['NDC'].dropna().unique()
+            st.markdown(f"### Found {len(ndc_list)} NDC(s) associated with Rxcui {search_value}:")
+            for ndc in ndc_list:
+                st.markdown(f"- **NDC**: {ndc}")
     elif search_type == "NDC":
         filtered_df = df[(df['NDC'] == search_value) & 
                          (df['Insurance'].str.contains(insurance_input, na=False, case=False))]
@@ -63,6 +69,7 @@ if search_value and insurance_input:
         filtered_df = pd.DataFrame()
 else:
     filtered_df = pd.DataFrame()
+
 
 # Display results
 if not filtered_df.empty:
