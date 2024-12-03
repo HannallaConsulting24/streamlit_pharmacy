@@ -85,6 +85,11 @@ if not filtered_df.empty:
     alternatives['Net'] = pd.to_numeric(alternatives['Net'], errors='coerce').fillna(-1e9)
     alternatives['Copay'] = pd.to_numeric(alternatives['Copay'], errors='coerce').fillna(1e9)
 
+    # Replace placeholders with "Not Available" for display
+    alternatives['Net'] = alternatives['Net'].replace(-1e9, "Not Available")
+    alternatives['Copay'] = alternatives['Copay'].replace(1e9, "Not Available")
+    alternatives['Covered'] = alternatives['Covered'].fillna("Not Available")
+
     # Filtering options
     st.markdown(f"**Found {len(alternatives)} alternatives in the same class and insurance.**")
     filter_option = st.selectbox("Filter Alternatives By:", options=["None", "Highest Net", "Lowest Copay"])
