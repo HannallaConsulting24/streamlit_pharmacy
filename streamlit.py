@@ -79,7 +79,7 @@ if not filtered_df.empty:
     # Display alternative drugs from the same class and same insurance
     st.subheader("Alternative Drugs in the Same Class and Insurance")
     class_name = filtered_df.iloc[0]['ClassDb']  # Get the class of the first drug
-    alternatives = df[(df['ClassDb'] == class_name) & (df['Insurance'] == insurance_input)][['Cleaned Up Drug Name', 'Quantity', 'Net', 'Copay', 'Covered']].drop_duplicates()
+    alternatives = df[(df['ClassDb'] == class_name) & (df['Insurance'] == insurance_input)][['Cleaned Up Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb']].drop_duplicates()
 
     # Handle "NC" or NaN values for sorting
     alternatives['Net'] = pd.to_numeric(alternatives['Net'], errors='coerce').fillna(-1e9)
@@ -99,6 +99,7 @@ if not filtered_df.empty:
     for _, alt_row in alternatives.iterrows():
         st.markdown("---")
         st.markdown(f"### Alternative Drug Name: **{alt_row['Cleaned Up Drug Name']}**")
+        st.markdown(f"- **Class Name**: {alt_row['ClassDb']}")
         st.markdown(f"- **Details**: Quantity: {alt_row['Quantity']}, Net: {alt_row['Net']}, Copay: {alt_row['Copay']}, Covered: {alt_row['Covered']}")
 else:
     if search_value and insurance_input:
