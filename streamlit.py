@@ -10,7 +10,7 @@ def load_main_data():
 
 @st.cache_data
 def load_ndc_data():
-    file_path = 'NDC_data2.csv'  # File for NDC search
+    file_path = 'NDC_data2 (2).csv'  # File for NDC search
     return pd.read_csv(file_path).drop_duplicates()
 
 # Load the data
@@ -18,7 +18,7 @@ df = load_main_data()
 ndc_df = load_ndc_data()
 
 # Display logo and title
-logo_path = "image.png"  # Path to the uploaded logo
+logo_path = "image (1).png"  # Path to the uploaded logo
 
 # Use columns for better alignment
 col1, col2 = st.columns([1, 4])  # Adjust column widths
