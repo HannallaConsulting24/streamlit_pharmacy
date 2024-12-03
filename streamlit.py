@@ -10,7 +10,7 @@ def load_main_data():
 
 @st.cache_data
 def load_ndc_data():
-    file_path = 'NDC_data2 (2).csv'  # File for NDC search
+    file_path = 'NDC_Details_RxNav.csv'  # Updated file for NDC search
     return pd.read_csv(file_path).drop_duplicates()
 
 # Load the data
@@ -66,11 +66,14 @@ if search_value and insurance_input:
             for ndc in ndc_list:
                 st.markdown(f"- **NDC**: {ndc}")
     elif search_type == "NDC":
-        filtered_df = ndc_df[(ndc_df['NDC'] == search_value)]
+        filtered_df = ndc_df[ndc_df['NDC'] == search_value]
     
     if not filtered_df.empty:
         if search_type == "NDC":
-            filtered_df = filtered_df[['NDC', 'Status', 'Active', 'RxNorm NDC', 'RxCUI', 'Concept Name', 'Concept Status', 'Sources', 'Alt NDC', 'Comment', 'History']].drop_duplicates()
+            filtered_df = filtered_df[['NDC', 'ANDA', 'COLORTEXT', 'DM_SPL_ID', 'IMPRINT_CODE', 
+                                       'LABELER', 'LABEL_TYPE', 'MARKETING_CATEGORY', 
+                                       'MARKETING_EFFECTIVE_TIME_LOW', 'MARKETING_STATUS', 
+                                       'SCORE', 'SHAPETEXT', 'SHAPE', 'SIZE']].drop_duplicates()
         else:
             filtered_df = filtered_df[['Cleaned Up Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb']].drop_duplicates().replace("Not Available", np.nan)
     else:
@@ -85,16 +88,19 @@ if not filtered_df.empty:
         for _, row in filtered_df.iterrows():
             st.markdown("---")
             st.markdown(f"- **NDC**: {row['NDC']}")
-            st.markdown(f"- **Status**: {row['Status']}")
-            st.markdown(f"- **Active**: {row['Active']}")
-            st.markdown(f"- **RxNorm NDC**: {row['RxNorm NDC']}")
-            st.markdown(f"- **RxCUI**: {row['RxCUI']}")
-            st.markdown(f"- **Concept Name**: {row['Concept Name']}")
-            st.markdown(f"- **Concept Status**: {row['Concept Status']}")
-            st.markdown(f"- **Sources**: {row['Sources']}")
-            st.markdown(f"- **Alt NDC**: {row['Alt NDC']}")
-            st.markdown(f"- **Comment**: {row['Comment']}")
-            st.markdown(f"- **History**: {row['History']}")
+            st.markdown(f"- **ANDA**: {row['ANDA']}")
+            st.markdown(f"- **Color Text**: {row['COLORTEXT']}")
+            st.markdown(f"- **DM SPL ID**: {row['DM_SPL_ID']}")
+            st.markdown(f"- **Imprint Code**: {row['IMPRINT_CODE']}")
+            st.markdown(f"- **Labeler**: {row['LABELER']}")
+            st.markdown(f"- **Label Type**: {row['LABEL_TYPE']}")
+            st.markdown(f"- **Marketing Category**: {row['MARKETING_CATEGORY']}")
+            st.markdown(f"- **Marketing Effective Time Low**: {row['MARKETING_EFFECTIVE_TIME_LOW']}")
+            st.markdown(f"- **Marketing Status**: {row['MARKETING_STATUS']}")
+            st.markdown(f"- **Score**: {row['SCORE']}")
+            st.markdown(f"- **Shape Text**: {row['SHAPETEXT']}")
+            st.markdown(f"- **Shape**: {row['SHAPE']}")
+            st.markdown(f"- **Size**: {row['SIZE']}")
             st.markdown("---")
     else:
         st.subheader(f"Results for your search:")
