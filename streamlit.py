@@ -53,19 +53,31 @@ if search_value and insurance_input:
     elif search_type == "Rxcui":
         filtered_df = df[(df['Rxcui'] == int(search_value)) & 
                          (df['Insurance'].str.contains(insurance_input, na=False, case=False))]
+        if not filtered_df.empty:
+            ndc_values = df[df['Rxcui'] == int(search_value)][['NDC', 'Cleaned Up Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb']].drop_duplicates()
+        else:
+            ndc_values = pd.DataFrame()
     elif search_type == "NDC":
         filtered_df = df[(df['NDC'] == search_value) & 
                          (df['Insurance'].str.contains(insurance_input, na=False, case=False))]
-    
-    if not filtered_df.empty:
-        filtered_df = filtered_df[['Cleaned Up Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb']].drop_duplicates().replace("Not Available", np.nan)
-    else:
-        filtered_df = pd.DataFrame()
+        ndc_values = pd.DataFrame()
 else:
     filtered_df = pd.DataFrame()
+    ndc_values = pd.DataFrame()
 
 # Display results
-if not filtered_df.empty:
+if search_type == "Rxcui" and not ndc_values.empty:
+    st.subheader(f"Results for Rxcui: {search_value}")
+    for _, row in ndc_values.iterrows():
+        st.markdown("---")
+        st.markdown(f"### NDC: **{row['NDC']}**")
+        st.markdown(f"- **Drug Name**: {row['Cleaned Up Drug Name']}")
+        st.markdown(f"- **Quantity**: {row['Quantity']}")
+        st.markdown(f"- **Net**: {row['Net']}")
+        st.markdown(f"- **Copay**: {row['Copay']}")
+        st.markdown(f"- **Covered**: {row['Covered']}")
+        st.markdown(f"- **ClassDb**: {row['ClassDb']}")
+elif not filtered_df.empty:
     st.subheader(f"Results for your search:")
     for _, row in filtered_df.iterrows():
         st.markdown("---")
