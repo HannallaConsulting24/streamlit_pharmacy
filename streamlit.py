@@ -107,36 +107,6 @@ if not filtered_df.empty:
             st.markdown(f"- **Covered**: {row['Covered']}")
             st.markdown(f"- **ClassDb**: {row['ClassDb']}")
             st.markdown("---")
-                # Display alternative drugs from the same class and same insurance
-    st.subheader("Alternative Drugs in the Same Class and Insurance")
-    class_name = filtered_df.iloc[0]['ClassDb']  # Get the class of the first drug
-    alternatives = df[(df['ClassDb'] == class_name) & (df['Insurance'] == insurance_input)][['Cleaned Up Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb']].drop_duplicates()
-
-    # Handle missing values and sorting
-    alternatives['Net'] = pd.to_numeric(alternatives['Net'], errors='coerce')  # Keep nan for lowest
-    alternatives['Copay'] = pd.to_numeric(alternatives['Copay'], errors='coerce')  # Keep nan for lowest
-
-    # Filtering options
-    st.markdown(f"**Found {len(alternatives)} alternatives in the same class and insurance.**")
-    filter_option = st.selectbox("Filter Alternatives By:", options=["None", "Highest Net", "Lowest Copay"])
-    
-    # Apply filter
-    if filter_option == "Highest Net":
-        alternatives = alternatives.sort_values(by="Net", ascending=False, na_position="last")
-    elif filter_option == "Lowest Copay":
-        alternatives = alternatives.sort_values(by="Copay", ascending=True, na_position="first")
-
-    # Display filtered alternatives
-    for _, alt_row in alternatives.iterrows():
-        st.markdown("---")
-        st.markdown(f"### Alternative Drug Name: **{alt_row['Cleaned Up Drug Name']}**")
-        st.markdown(f"- **Class Name**: {alt_row['ClassDb']}")
-        st.markdown(f"- **Details**: Quantity: {alt_row['Quantity']}, Net: {alt_row['Net']}, Copay: {alt_row['Copay']}, Covered: {alt_row['Covered']}")
-else:
-    if search_value and insurance_input:
-        st.warning(f"No results found for {search_type}: {search_value} with Insurance: {insurance_input}.")
-    else:
-        st.info("Please enter both search criteria and insurance to get results.")
 else:
     if search_value and insurance_input:
         st.warning(f"No results found for {search_type}: {search_value} with Insurance: {insurance_input}.")
