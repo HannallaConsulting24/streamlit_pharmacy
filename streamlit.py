@@ -39,7 +39,7 @@ st.info("Search using Drug Name, Rxcui, or NDC, and Insurance.")
 drug_names = df['Cleaned Up Drug Name'].dropna().unique()
 insurance_names = df['Insurance'].dropna().unique()
 rxcui_codes = df['Rxcui'].dropna().unique()
-ndc_codes = df['NDC'].dropna().unique()
+ndc_codes = ndc_df['NDC'].dropna().unique()
 
 # Search fields with auto-complete
 search_type = st.radio("Select Search Type:", ["Drug Name", "Rxcui", "NDC"])
@@ -75,24 +75,27 @@ if search_value and insurance_input:
                          (df['Insurance'].str.contains(insurance_input, na=False, case=False))]
 
     if not filtered_df.empty:
-        # Display filtered data
+        # Display filtered data (show only the first valid result)
         filtered_df = filtered_df[['Cleaned Up Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb']].drop_duplicates().replace("Not Available", np.nan)
 
         st.subheader(f"Results for your {search_type} search:")
-        for _, row in filtered_df.iterrows():
-            st.markdown("---")
-            st.markdown(f"### Drug Name: **{row['Cleaned Up Drug Name']}**")
-            st.markdown(f"- **Quantity**: {row['Quantity']}")
-            st.markdown(f"- **Net**: {row['Net']}")
-            st.markdown(f"- **Copay**: {row['Copay']}")
-            st.markdown(f"- **Covered**: {row['Covered']}")
-            st.markdown(f"- **ClassDb**: {row['ClassDb']}")
-            st.markdown("---")
+
+        # Assuming that if there are multiple rows with the same NDC or Drug Name, we only display the first one
+        first_valid_result = filtered_df.iloc[0]
+        
+        st.markdown("---")
+        st.markdown(f"### Drug Name: **{first_valid_result['Cleaned Up Drug Name']}**")
+        st.markdown(f"- **Quantity**: {first_valid_result['Quantity']}")
+        st.markdown(f"- **Net**: {first_valid_result['Net']}")
+        st.markdown(f"- **Copay**: {first_valid_result['Copay']}")
+        st.markdown(f"- **Covered**: {first_valid_result['Covered']}")
+        st.markdown(f"- **ClassDb**: {first_valid_result['ClassDb']}")
+        st.markdown("---")
 
         # Display alternative drugs from the same class and same insurance for Drug Name and Rxcui
         if search_type in ["Drug Name", "Rxcui"]:
             st.subheader("Alternative Drugs in the Same Class and Insurance")
-            class_name = filtered_df.iloc[0]['ClassDb']  # Get the class of the first drug
+            class_name = first_valid_result['ClassDb']  # Get the class of the first drug
             alternatives = df[(df['ClassDb'] == class_name) & (df['Insurance'] == insurance_input)][['Cleaned Up Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb']].drop_duplicates()
 
             # Handle missing values and sorting
