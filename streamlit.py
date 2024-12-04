@@ -39,7 +39,7 @@ st.info("Search using Drug Name, Rxcui, or NDC, and Insurance.")
 drug_names = df['Cleaned Up Drug Name'].dropna().unique()
 insurance_names = df['Insurance'].dropna().unique()
 rxcui_codes = df['Rxcui'].dropna().unique()
-ndc_codes = ndc_df['NDC'].dropna().unique()
+ndc_codes = df['NDC'].dropna().unique()
 
 # Search fields with auto-complete
 search_type = st.radio("Select Search Type:", ["Drug Name", "Rxcui", "NDC"])
