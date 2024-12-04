@@ -17,6 +17,10 @@ def load_ndc_data():
 df = load_main_data()
 ndc_df = load_ndc_data()
 
+# Ensure the NDC columns are strings for comparison and strip any whitespace
+df['NDC'] = df['NDC'].astype(str).str.strip()
+ndc_df['NDC'] = ndc_df['NDC'].astype(str).str.strip()
+
 # Display logo and title
 logo_path = "image (1).png"  # Path to the uploaded logo
 
@@ -66,6 +70,7 @@ if search_value and insurance_input:
             for ndc in ndc_list:
                 st.markdown(f"- **NDC**: {ndc}")
     elif search_type == "NDC":
+        # Search in Matched_Data_Final2 for the given NDC
         filtered_df = df[(df['NDC'] == search_value) & 
                          (df['Insurance'].str.contains(insurance_input, na=False, case=False))]
 
