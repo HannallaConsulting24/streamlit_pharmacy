@@ -60,71 +60,88 @@ if search_value and insurance_input:
         filtered_df = df[(df['Rxcui'] == int(search_value)) & 
                          (df['Insurance'].str.contains(insurance_input, na=False, case=False))]
         if not filtered_df.empty:
+            # Extract unique NDCs associated with the selected Rxcui
             ndc_list = filtered_df['NDC'].dropna().unique()
             st.markdown(f"### Found {len(ndc_list)} NDC(s) associated with Rxcui {search_value}:")
             for ndc in ndc_list:
                 st.markdown(f"- **NDC**: {ndc}")
     elif search_type == "NDC":
-        # Search in NDC_Details_RxNav.csv
-        ndc_details = ndc_df[ndc_df['NDC'] == search_value]
-
-        # Search in Matched_Data_Final2.csv
-        filtered_df = df[(df['NDC'] == search_value) & 
-                         (df['Insurance'].str.contains(insurance_input, na=False, case=False))]
-        
-        if not filtered_df.empty:
+        filtered_df = ndc_df[ndc_df['NDC'] == search_value]
+    
+    if not filtered_df.empty:
+        if search_type == "NDC":
+            filtered_df = filtered_df[['NDC', 'ANDA', 'COLORTEXT', 'DM_SPL_ID', 'IMPRINT_CODE', 
+                                       'LABELER', 'LABEL_TYPE', 'MARKETING_CATEGORY', 
+                                       'MARKETING_EFFECTIVE_TIME_LOW', 'MARKETING_STATUS', 
+                                       'SCORE', 'SHAPETEXT', 'SHAPE', 'SIZE']].drop_duplicates()
+        else:
             filtered_df = filtered_df[['Cleaned Up Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb']].drop_duplicates().replace("Not Available", np.nan)
-            st.subheader(f"Results for NDC: {search_value} with Insurance: {insurance_input}")
-            for _, row in filtered_df.iterrows():
-                st.markdown("---")
-                st.markdown(f"### Drug Name: **{row['Cleaned Up Drug Name']}**")
-                st.markdown(f"- **Quantity**: {row['Quantity']}")
-                st.markdown(f"- **Net**: {row['Net']}")
-                st.markdown(f"- **Copay**: {row['Copay']}")
-                st.markdown(f"- **Covered**: {row['Covered']}")
-                st.markdown(f"- **ClassDb**: {row['ClassDb']}")
-                st.markdown("---")
-
-            # Alternatives in the same class and insurance
-            st.subheader("Alternative Drugs in the Same Class and Insurance")
-            class_name = filtered_df.iloc[0]['ClassDb']
-            alternatives = df[(df['ClassDb'] == class_name) & (df['Insurance'] == insurance_input)][['Cleaned Up Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb']].drop_duplicates()
-            if not alternatives.empty:
-                st.markdown(f"**Found {len(alternatives)} alternatives in the same class and insurance.**")
-                for _, alt_row in alternatives.iterrows():
-                    st.markdown("---")
-                    st.markdown(f"### Alternative Drug Name: **{alt_row['Cleaned Up Drug Name']}**")
-                    st.markdown(f"- **Class Name**: {alt_row['ClassDb']}")
-                    st.markdown(f"- **Details**: Quantity: {alt_row['Quantity']}, Net: {alt_row['Net']}, Copay: {alt_row['Copay']}, Covered: {alt_row['Covered']}")
-
-        if not ndc_details.empty:
-            st.subheader("Additional NDC Details")
-            for _, row in ndc_details.iterrows():
-                st.markdown("---")
-                st.markdown(f"- **NDC**: {row['NDC']}")
-                st.markdown(f"- **ANDA**: {row['ANDA']}")
-                st.markdown(f"- **Color Text**: {row['COLORTEXT']}")
-                st.markdown(f"- **Color**: {row['COLOR']}")
-                st.markdown(f"- **DM SPL ID**: {row['DM_SPL_ID']}")
-                st.markdown(f"- **Imprint Code**: {row['IMPRINT_CODE']}")
-                st.markdown(f"- **Labeler**: {row['LABELER']}")
-                st.markdown(f"- **Label Type**: {row['LABEL_TYPE']}")
-                st.markdown(f"- **Marketing Category**: {row['MARKETING_CATEGORY']}")
-                st.markdown(f"- **Marketing Effective Time Low**: {row['MARKETING_EFFECTIVE_TIME_LOW']}")
-                st.markdown(f"- **Marketing Status**: {row['MARKETING_STATUS']}")
-                st.markdown(f"- **Score**: {row['SCORE']}")
-                st.markdown(f"- **Shape Text**: {row['SHAPETEXT']}")
-                st.markdown(f"- **Shape**: {row['SHAPE']}")
-                st.markdown(f"- **Size**: {row['SIZE']}")
-                st.markdown(f"- **NDA Authorized Generic**: {row['NDA_AUTHORIZED_GENERIC']}")
-                st.markdown(f"- **Marketing Effective Time High**: {row['MARKETING_EFFECTIVE_TIME_HIGH']}")
-                st.markdown(f"- **NDA**: {row['NDA']}")
-                st.markdown(f"- **Unapproved Drug Other**: {row['UNAPPROVED_DRUG_OTHER']}")
-                st.markdown(f"- **OTC Monograph Drug**: {row['OTC_MONOGRAPH_DRUG']}")
-                st.markdown(f"- **OTC Monograph Final**: {row['OTC_MONOGRAPH_FINAL']}")
-                st.markdown("---")
-
-    if filtered_df.empty and ndc_details.empty:
-        st.warning(f"No results found for NDC: {search_value} with Insurance: {insurance_input}.")
+    else:
+        filtered_df = pd.DataFrame()
 else:
-    st.info("Please enter both search criteria and insurance to get results.")
+    filtered_df = pd.DataFrame()
+
+# Display results
+if not filtered_df.empty:
+    if search_type == "NDC":
+        st.subheader(f"Results for your NDC search:")
+        for _, row in filtered_df.iterrows():
+            st.markdown("---")
+            st.markdown(f"- **NDC**: {row['NDC']}")
+            st.markdown(f"- **ANDA**: {row['ANDA']}")
+            st.markdown(f"- **Color Text**: {row['COLORTEXT']}")
+            st.markdown(f"- **DM SPL ID**: {row['DM_SPL_ID']}")
+            st.markdown(f"- **Imprint Code**: {row['IMPRINT_CODE']}")
+            st.markdown(f"- **Labeler**: {row['LABELER']}")
+            st.markdown(f"- **Label Type**: {row['LABEL_TYPE']}")
+            st.markdown(f"- **Marketing Category**: {row['MARKETING_CATEGORY']}")
+            st.markdown(f"- **Marketing Effective Time Low**: {row['MARKETING_EFFECTIVE_TIME_LOW']}")
+            st.markdown(f"- **Marketing Status**: {row['MARKETING_STATUS']}")
+            st.markdown(f"- **Score**: {row['SCORE']}")
+            st.markdown(f"- **Shape Text**: {row['SHAPETEXT']}")
+            st.markdown(f"- **Shape**: {row['SHAPE']}")
+            st.markdown(f"- **Size**: {row['SIZE']}")
+            st.markdown("---")
+    else:
+        st.subheader(f"Results for your search:")
+        for _, row in filtered_df.iterrows():
+            st.markdown("---")
+            st.markdown(f"### Drug Name: **{row['Cleaned Up Drug Name']}**")
+            st.markdown(f"- **Quantity**: {row['Quantity']}")
+            st.markdown(f"- **Net**: {row['Net']}")
+            st.markdown(f"- **Copay**: {row['Copay']}")
+            st.markdown(f"- **Covered**: {row['Covered']}")
+            st.markdown(f"- **ClassDb**: {row['ClassDb']}")
+            st.markdown("---")
+        
+        # Display alternative drugs from the same class and same insurance for Drug Name and Rxcui only
+        if search_type in ["Drug Name", "Rxcui"]:
+            st.subheader("Alternative Drugs in the Same Class and Insurance")
+            class_name = filtered_df.iloc[0]['ClassDb']  # Get the class of the first drug
+            alternatives = df[(df['ClassDb'] == class_name) & (df['Insurance'] == insurance_input)][['Cleaned Up Drug Name', 'Quantity', 'Net', 'Copay', 'Covered', 'ClassDb']].drop_duplicates()
+
+            # Handle missing values and sorting
+            alternatives['Net'] = pd.to_numeric(alternatives['Net'], errors='coerce')  # Keep nan for lowest
+            alternatives['Copay'] = pd.to_numeric(alternatives['Copay'], errors='coerce')  # Keep nan for lowest
+
+            # Filtering options
+            st.markdown(f"**Found {len(alternatives)} alternatives in the same class and insurance.**")
+            filter_option = st.selectbox("Filter Alternatives By:", options=["None", "Highest Net", "Lowest Copay"])
+            
+            # Apply filter
+            if filter_option == "Highest Net":
+                alternatives = alternatives.sort_values(by="Net", ascending=False, na_position="last")
+            elif filter_option == "Lowest Copay":
+                alternatives = alternatives.sort_values(by="Copay", ascending=True, na_position="first")
+
+            # Display filtered alternatives
+            for _, alt_row in alternatives.iterrows():
+                st.markdown("---")
+                st.markdown(f"### Alternative Drug Name: **{alt_row['Cleaned Up Drug Name']}**")
+                st.markdown(f"- **Class Name**: {alt_row['ClassDb']}")
+                st.markdown(f"- **Details**: Quantity: {alt_row['Quantity']}, Net: {alt_row['Net']}, Copay: {alt_row['Copay']}, Covered: {alt_row['Covered']}")
+else:
+    if search_value and insurance_input:
+        st.warning(f"No results found for {search_type}: {search_value} with Insurance: {insurance_input}.")
+    else:
+        st.info("Please enter both search criteria and insurance to get results.")
